@@ -7,6 +7,7 @@
     --background-color: #FFF;
 }
 
+/* Applies to All*/
 body {
     background-color: var(--background-color);
     min-height: 100vh;
@@ -15,40 +16,56 @@ body {
     justify-content: center;
 }
 
+/* Container for Game */ 
 .board-game-ui {
     color: var(--text-color);
     display: grid;
-    grid-template-rows: auto auto auto;
-    width: 50%;
+    width: 60%;
+    grid-template-rows: auto auto 1fr auto;
+    gap: 1rem;
     border: 1px solid var(--secondary-color);
     border-radius: 0.5rem;
     padding: 20px;
 }
 
-.header {
-    margin-bottom: 10px;
+/* Header */
+.header select {
+    background-color: none;
+    border-bottom: 2px solid var(--secondary-color);
 }
 
-.difficulty-select {
-    align-self: flex-start;
-    margin-top: 0;
-    margin-bottom: 0;
+/* Second Row of Grid */
+.upper-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
+.upper-header .item-select {
+    display: flex;
+    gap: 10px;
+}
+
+.upper-header .item-select .btn {
+    background-color: var(--background-color);
+    border: 2px solid var(--secondary-color);
+    width: 15em;
+    height: 2.5em;
+    border-radius: 0.5rem;
+}
+
+/* Third Row of Grid */
 .board-game-grid {
     background-color: var(--primary-color);
-    margin: 0px -20px;
     padding: 20px;
 }
 
+/* Fourth Row of Grid */
 .footer {
     margin-top: 10px;
     display: flex;
     justify-content: center;
     align-items: center;
-}
-
-.footer {
     font-weight: 600;
     font-size: 1rem;
 }
