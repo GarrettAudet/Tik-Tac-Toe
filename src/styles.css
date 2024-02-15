@@ -119,3 +119,7 @@ body {
     font-weight: 600;
     font-size: 1.5rem;
 }
+
+.game-result {
+    cursor: pointer;
+}

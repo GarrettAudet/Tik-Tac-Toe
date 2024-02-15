@@ -51,7 +51,8 @@ const gameBoard = () => {
 }
 
 function handleFieldClick(e) {
-    console.log("Field Clicked");
+    const index = e.target.dataset.index;
+    console.log("Field Clicked", index);
 }
 
 const displayController = () => {
