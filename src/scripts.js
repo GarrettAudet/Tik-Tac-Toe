@@ -1,3 +1,133 @@
+const Player = (sign) => {
+    const getSign = () => sign;
+    return { getSign }
+}
+
+const gameBoard = () => {
+    const board = new Array(9).fill('_');
+    
+    const isValidMove = (position) => {
+        return board[position] === '_';
+    } 
+
+    const getField = (num) => board[num];
+
+    const makeMove = (position, player) => {
+        if (isValidMove(position)) {
+            board[position] = player;
+            return true;
+        }
+        return false; 
+    }
+
+    const reset = () => {
+        for (let i=0; i < board.length; i++) {
+            board[i] = '_'
+        }
+    }
+
+    const checkWin = (currentPlayer) => {
+        // Check Rows for Win
+        for (let i = 0; i < 9; i += 3) {
+            if (board[i] === currentPlayer.getSign() && board[i + 1] === currentPlayer.getSign() && board[i + 2] === currentPlayer.getSign()) {
+                return true;
+            }
+        }
+        // Check Columns for Win
+        for (let i = 0; i < 3; i++) {
+            if (board[i] === currentPlayer.getSign() && board[i + 3] === currentPlayer.getSign() && board[i + 6] === currentPlayer.getSign()) {
+                return true;
+            }
+        }
+        // Check Diagonals for Win
+        if ((board[0] === currentPlayer.getSign() && board[4] === currentPlayer.getSign() && board[8] === currentPlayer.getSign()) ||
+            (board[2] === currentPlayer.getSign() && board[4] === currentPlayer.getSign() && board[6] === currentPlayer.getSign())) {
+                return true;
+        }
+        return false;
+    }
+
+    return {getField, makeMove, reset}
+}
+
+function handleFieldClick(e) {
+    console.log("Field Clicked");
+}
+
+const displayController = () => {
+    const fieldElements = document.querySelectorAll(".game-board-field");
+
+    fieldElements.forEach((field) => {
+        field.addEventListener("click", handleFieldClick);
+    }
+  );
+}
+
+const gameController = () => {
+    const playerX = Player("X");
+    const playerO = Player("O");
+    let move = 1;
+    let finishedGame = false;
+
+    const playRound = (position) => {
+        gameBoard.makeMove(position, getCurrentPlayerSign());
+        if (gameBoard.checkWin(getCurrentPlayerSign())) {
+            console.log("The Game is Won");
+            finishedGame = true;
+        }
+        if (move === 9) {
+            console.log("The Game is a Tie");
+            finishedGame = true;
+        }
+        move++;
+    }
+
+    const getCurrentPlayerSign = () => {
+        return move % 2 === 1 ? playerX.getSign() : playerO.getSign();
+    }
+
+    const reset = () => {
+        round = 1;
+        finishedGame = false;
+    }
+}
+
+/*
+Functions to recreate: printBoard, switchPlayer, checkWin, playGame
+Functions Done: initializeBoard, printBoard, isValidMove, makeMove
+
+*/ 
+
+// A Function to Switch Players
+function switchPlayer (player) {
+    console.log('variable test');
+    console.log(player);
+    return (player === 'X'?'O':'X');
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // A Function to Create an Array
 function initializeBoard () {
 
@@ -92,6 +222,14 @@ function playGame () {
     }
 }
 
+
+
+
+
+
+
+
+
 // A Function that Enables a Button Toggle
 function setupButtonToggle() {
     // Establish New Array and Retrieve Variables
@@ -112,7 +250,8 @@ function setupButtonToggle() {
 }
 
 document.addEventListener('DOMContentLoaded', setupButtonToggle);
+document.addEventListener('DOMContentLoaded', displayController);
+
 // Select Relevant Variables
 let gameFields = document.querySelectorAll('game-board-field');
 let player = 'X';
-playGame();
