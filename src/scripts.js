@@ -1,15 +1,98 @@
-const gameBoard = () => {
-    // Select Relevant Variables
-    let gameFields = document.querySelectorAll('game-board-field');
-    let currentPlayer = 'X';
-    let isGameActive = true;
+// A Function to Create an Array
+function initializeBoard () {
 
     // Establish New Array and Retrieve Variables
-    let board = new Array(9);
+    let board = new Array(9).fill('_');
 
-
+    // Return Board
+    return board;
 }
 
+// A Function to Print the Current Array
+function printBoard(board) {
+    for (let i = 0; i < board.length; i += 3) {
+        console.log(board.slice(i, i + 3).join(' '));
+    }
+}
+
+// A Function to Check if a Move is Valid
+function isValidMove (board, position) {
+    return board[position] === '_';
+} 
+
+// A Function to Make A Move
+function makeMove (board, position, player) {
+    if (isValidMove(board, position)) {
+        board[position] = player;
+        return true;
+    }
+    return false; 
+}
+
+// A Function to Switch Players
+function switchPlayer (player) {
+    console.log('variable test');
+    console.log(player);
+    return (player === 'X'?'O':'X');
+}
+
+// A Function to Check for a Tic-Tac-Toe Win
+function checkWin(board, currentPlayer) {
+    // Check Rows for Win
+    for (let i = 0; i < 9; i += 3) {
+        if (board[i] === currentPlayer && board[i + 1] === currentPlayer && board[i + 2] === currentPlayer) {
+            return true;
+        }
+    }
+    // Check Columns for Win
+    for (let i = 0; i < 3; i++) {
+        if (board[i] === currentPlayer && board[i + 3] === currentPlayer && board[i + 6] === currentPlayer) {
+            return true;
+        }
+    }
+    // Check Diagonals for Win
+    if ((board[0] === currentPlayer && board[4] === currentPlayer && board[8] === currentPlayer) ||
+        (board[2] === currentPlayer && board[4] === currentPlayer && board[6] === currentPlayer)) {
+        return true;
+    }
+    return false;
+}
+
+// A Function to Play the Game
+function playGame () {
+    let currentPlayer = 'X'
+    console.log('testing');
+    console.log(currentPlayer);
+    let moves = 0;
+
+    // Create Fresh Board
+    let board = initializeBoard ();
+
+    // Loop to Play Game
+    while (moves < 9) {
+        console.log('Test inside while loop');
+        console.log(currentPlayer);
+        printBoard(board);
+        let position = prompt ("Player ${currentPlayer}, enter your move (0-8):`")
+        if (makeMove(board, position, currentPlayer)) {
+            console.log(`Player ${currentPlayer} completed a turn`);
+            moves++;
+            if (checkWin(board, currentPlayer)) {
+                console.log(`Player ${currentPlayer} wins!`);
+                printBoard(board);
+                return;
+            }
+            currentPlayer = switchPlayer(currentPlayer);
+            console.log('test');
+            console.log(currentPlayer);
+        } else {
+            console.log("Position taken, try again");
+            printBoard(board);
+        }
+    }
+}
+
+// A Function that Enables a Button Toggle
 function setupButtonToggle() {
     // Establish New Array and Retrieve Variables
     let buttonX = document.getElementById("btn-x")
@@ -29,3 +112,7 @@ function setupButtonToggle() {
 }
 
 document.addEventListener('DOMContentLoaded', setupButtonToggle);
+// Select Relevant Variables
+let gameFields = document.querySelectorAll('game-board-field');
+let player = 'X';
+playGame();
