@@ -10,13 +10,10 @@ const gameBoard = (() => {
     
     const getField = (num) => board[num];
     const setField = (position, player) => {
-        console.log('setField triggered')
         if (isValidMove(position)) {
-            console.log('True')
             board[position] = player;
             return true;
         }
-        console.log('False')
         return false; 
     }
 
@@ -52,6 +49,15 @@ const gameBoard = (() => {
 const displayController = (() => {
     const fieldElements = document.querySelectorAll(".game-board-field");
     const gameResultElement = document.querySelector('.game-status');
+    const buttonX = document.getElementById('btn-x');
+    const buttonO = document.getElementById('btn-o');
+    let eventListenerEnabled = true;
+
+    const fieldClickHandler = (index) => {
+        if (eventListenerEnabled) {
+            gameController.playRound(index);
+        }
+    }
 
     const updateGameBoard = () => {
         fieldElements.forEach((field,index) => {
@@ -62,7 +68,8 @@ const displayController = (() => {
 
     fieldElements.forEach((field, index) => {
         field.addEventListener("click", () => {
-            gameController.playRound(index);
+            fieldClickHandler(index);
+            console.log('test')
         });
     });
 
@@ -70,7 +77,29 @@ const displayController = (() => {
         gameResultElement.textContent = message;
     };
 
-    return { updateGameBoard, displayResult }
+    const disableEventListener = () => {
+        eventListenerEnabled = false;
+    };
+
+    const enableEventListener = () => {
+        eventListenerEnabled = true;
+    };
+
+    const toggleButton = (button) => {
+        if (button === "O") {
+            buttonO.classList.toggle('selected');
+            buttonX.classList.toggle('selected');
+            return
+        } 
+        buttonX.classList.toggle('selected');
+        buttonO.classList.toggle('selected');
+        if (button === 'R') {
+            buttonX.classList.add('selected');
+            buttonO.classList.remove('selected');
+        }
+    }
+
+    return { updateGameBoard, displayResult, toggleButton, enableEventListener, disableEventListener }
 })();
 
 // Game controller to handle game logic
@@ -84,28 +113,27 @@ const gameController = (() => {
     const getCurrentPlayerSign = () => currentPlayer.getSign();
 
     const playRound = (index) => {
-        console.log('playRound Triggered')
         // Attempt to set the field; if successful, update the board and check game status
         if (gameBoard.setField(index, getCurrentPlayerSign())) {
-            console.log('playRound condition passed')
             moveCount++;
             displayController.updateGameBoard();
             checkGameStatus();
+            displayController.toggleButton(currentPlayer.getSign());
             // Switch the current player for the next turn
-            console.log('test')
             currentPlayer = currentPlayer === playerX ? playerO : playerX;
         }
     };
 
     const checkGameStatus = () => {
-        console.log('test')
         // Check for a win or a tie, and update the game result display accordingly
         if (gameBoard.checkWin(currentPlayer)) {
             displayController.displayResult(`Player ${getCurrentPlayerSign()} Wins!`);
+            displayController.disableEventListener();
             return;
         }
         if (moveCount >= 9) {
             displayController.displayResult("It's a Tie!");
+            displayController.disableEventListener();
             return;
         }
     };
@@ -114,8 +142,10 @@ const gameController = (() => {
         gameBoard.reset();
         currentPlayer = playerX; // Reset to player X for the new game
         moveCount = 0;
-        displayController.updateGameBoard();
         displayController.displayResult("Tic-Tak-Toe"); // Clear the result display
+        displayController.updateGameBoard();
+        displayController.enableEventListener();
+        displayController.toggleButton("R");
     };
 
     return { playRound, resetGame, getCurrentPlayerSign, checkGameStatus };
