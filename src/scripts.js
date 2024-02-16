@@ -1,18 +1,16 @@
+// Player factory function to create Players X and O
 const Player = (sign) => {
     const getSign = () => sign;
     return { getSign }
 }
 
-const gameBoard = () => {
+// Game board module to manage game state
+const gameBoard = (() => {
+    console.log('gameBoard is working')
     const board = new Array(9).fill('_');
     
-    const isValidMove = (position) => {
-        return board[position] === '_';
-    } 
-
     const getField = (num) => board[num];
-
-    const makeMove = (position, player) => {
+    const setField = (position, player) => {
         if (isValidMove(position)) {
             board[position] = player;
             return true;
@@ -26,233 +24,108 @@ const gameBoard = () => {
         }
     }
 
-    const checkWin = (currentPlayer) => {
-        // Check Rows for Win
-        for (let i = 0; i < 9; i += 3) {
-            if (board[i] === currentPlayer.getSign() && board[i + 1] === currentPlayer.getSign() && board[i + 2] === currentPlayer.getSign()) {
-                return true;
-            }
-        }
-        // Check Columns for Win
-        for (let i = 0; i < 3; i++) {
-            if (board[i] === currentPlayer.getSign() && board[i + 3] === currentPlayer.getSign() && board[i + 6] === currentPlayer.getSign()) {
-                return true;
-            }
-        }
-        // Check Diagonals for Win
-        if ((board[0] === currentPlayer.getSign() && board[4] === currentPlayer.getSign() && board[8] === currentPlayer.getSign()) ||
-            (board[2] === currentPlayer.getSign() && board[4] === currentPlayer.getSign() && board[6] === currentPlayer.getSign())) {
-                return true;
-        }
-        return false;
+    const isValidMove = (position) => {
+        return board[position] === '_';
+    } 
+
+    const checkWin = (player) => {
+        const sign = player.getSign();
+        const winningCombinations = [
+            [0,1,2],[3,4,5],[6,7,8], // Rows
+            [0,3,6],[1,4,7],[2,5,8], // Columns
+            [0,4,8],[2,4,6]          // Diagonals 
+        ];
+
+        return winningCombinations.some(combination => {
+            return combination.every(index => {
+                return board[index] == sign;
+            });
+        });
     }
 
-    return {getField, makeMove, reset}
-}
+    return {getField, setField, reset, checkWin, board}
+})();
 
-function handleFieldClick(e) {
-    const index = e.target.dataset.index;
-    console.log("Field Clicked", index);
-}
-
-const displayController = () => {
+// Display Controller to manage UI updates
+const displayController = (() => {
+    console.log('displayController is working')
     const fieldElements = document.querySelectorAll(".game-board-field");
+    const gameResultElement = document.querySelector('.game-result');
 
-    fieldElements.forEach((field) => {
-        field.addEventListener("click", handleFieldClick);
-    }
-  );
-}
+    const updateGameBoard = () => {
+        fieldElements.forEach((field,index) => {
+            const cellValue = gameBoard.getField(index);
+            field.textContent = cellValue === '_' ? '' : cellValue;
+        })
+    };
 
-const gameController = () => {
+    fieldElements.forEach((field, index) => {
+        field.addEventListener("click", () => {
+            if (!gameBoard.setField(index, gameController.getCurrentPlayerSign())) return;
+            updateGameBoard();
+            gameController.checkGameStatus();
+        });
+    });
+
+    const displayResult = (message) => {
+        gameResultElement.textContent = message;
+    };
+
+    return { updateGameBoard, displayResult }
+})();
+
+// Game controller to handle game logic
+const gameController = (() => {
     const playerX = Player("X");
     const playerO = Player("O");
-    let move = 1;
-    let finishedGame = false;
+    let currentPlayer = playerX; // Start with player X
+    let moveCount = 0;
 
-    const playRound = (position) => {
-        gameBoard.makeMove(position, getCurrentPlayerSign());
-        if (gameBoard.checkWin(getCurrentPlayerSign())) {
-            console.log("The Game is Won");
-            finishedGame = true;
+    // Returns the sign ('X' or 'O') of the current player
+    const getCurrentPlayerSign = () => currentPlayer.getSign();
+
+    const playRound = (index) => {
+        // Attempt to set the field; if successful, update the board and check game status
+        if (gameBoard.setField(index, getCurrentPlayerSign())) {
+            moveCount++;
+            displayController.updateGameBoard();
+            checkGameStatus();
+            // Switch the current player for the next turn
+            currentPlayer = currentPlayer === playerX ? playerO : playerX;
         }
-        if (move === 9) {
-            console.log("The Game is a Tie");
-            finishedGame = true;
+    };
+
+    const checkGameStatus = () => {
+        // Check for a win or a tie, and update the game result display accordingly
+        if (gameBoard.checkWin(currentPlayer)) {
+            displayController.displayResult(`Player ${getCurrentPlayerSign()} Wins!`);
+            return;
         }
-        move++;
-    }
-
-    const getCurrentPlayerSign = () => {
-        return move % 2 === 1 ? playerX.getSign() : playerO.getSign();
-    }
-
-    const reset = () => {
-        round = 1;
-        finishedGame = false;
-    }
-}
-
-/*
-Functions to recreate: printBoard, switchPlayer, checkWin, playGame
-Functions Done: initializeBoard, printBoard, isValidMove, makeMove
-
-*/ 
-
-// A Function to Switch Players
-function switchPlayer (player) {
-    console.log('variable test');
-    console.log(player);
-    return (player === 'X'?'O':'X');
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// A Function to Create an Array
-function initializeBoard () {
-
-    // Establish New Array and Retrieve Variables
-    let board = new Array(9).fill('_');
-
-    // Return Board
-    return board;
-}
-
-// A Function to Print the Current Array
-function printBoard(board) {
-    for (let i = 0; i < board.length; i += 3) {
-        console.log(board.slice(i, i + 3).join(' '));
-    }
-}
-
-// A Function to Check if a Move is Valid
-function isValidMove (board, position) {
-    return board[position] === '_';
-} 
-
-// A Function to Make A Move
-function makeMove (board, position, player) {
-    if (isValidMove(board, position)) {
-        board[position] = player;
-        return true;
-    }
-    return false; 
-}
-
-// A Function to Switch Players
-function switchPlayer (player) {
-    console.log('variable test');
-    console.log(player);
-    return (player === 'X'?'O':'X');
-}
-
-// A Function to Check for a Tic-Tac-Toe Win
-function checkWin(board, currentPlayer) {
-    // Check Rows for Win
-    for (let i = 0; i < 9; i += 3) {
-        if (board[i] === currentPlayer && board[i + 1] === currentPlayer && board[i + 2] === currentPlayer) {
-            return true;
+        if (moveCount >= 9) {
+            displayController.displayResult("It's a Tie!");
+            return;
         }
-    }
-    // Check Columns for Win
-    for (let i = 0; i < 3; i++) {
-        if (board[i] === currentPlayer && board[i + 3] === currentPlayer && board[i + 6] === currentPlayer) {
-            return true;
-        }
-    }
-    // Check Diagonals for Win
-    if ((board[0] === currentPlayer && board[4] === currentPlayer && board[8] === currentPlayer) ||
-        (board[2] === currentPlayer && board[4] === currentPlayer && board[6] === currentPlayer)) {
-        return true;
-    }
-    return false;
-}
+    };
 
-// A Function to Play the Game
-function playGame () {
-    let currentPlayer = 'X'
-    console.log('testing');
-    console.log(currentPlayer);
-    let moves = 0;
+    const resetGame = () => {
+        gameBoard.reset();
+        currentPlayer = playerX; // Reset to player X for the new game
+        moveCount = 0;
+        displayController.updateGameBoard();
+        displayController.displayResult(""); // Clear the result display
+    };
 
-    // Create Fresh Board
-    let board = initializeBoard ();
+    return { playRound, resetGame, getCurrentPlayerSign, checkGameStatus };
+})();
 
-    // Loop to Play Game
-    while (moves < 9) {
-        console.log('Test inside while loop');
-        console.log(currentPlayer);
-        printBoard(board);
-        let position = prompt ("Player ${currentPlayer}, enter your move (0-8):`")
-        if (makeMove(board, position, currentPlayer)) {
-            console.log(`Player ${currentPlayer} completed a turn`);
-            moves++;
-            if (checkWin(board, currentPlayer)) {
-                console.log(`Player ${currentPlayer} wins!`);
-                printBoard(board);
-                return;
-            }
-            currentPlayer = switchPlayer(currentPlayer);
-            console.log('test');
-            console.log(currentPlayer);
-        } else {
-            console.log("Position taken, try again");
-            printBoard(board);
-        }
-    }
-}
+document.addEventListener('DOMContentLoaded', () => {
+    const gameResultElement = document.querySelector('.game-result');
 
-
-
-
-
-
-
-
-
-// A Function that Enables a Button Toggle
-function setupButtonToggle() {
-    // Establish New Array and Retrieve Variables
-    let buttonX = document.getElementById("btn-x")
-    let buttonO = document.getElementById("btn-o")
-
-    // Set Default Selection
-    buttonX.classList.add('selected');
-    
-    // Toggle Selected Button
-    function toggleSelection () {
-        buttonX.classList.toggle('selected');
-        buttonO.classList.toggle('selected');
+    if (gameResultElement) {
+        gameResultElement.addEventListener("click", gameController.resetGame);
+    } else {
+        console.error("The game result element was not found.");
     }
 
-    buttonX.addEventListener('click',toggleSelection);
-    buttonO.addEventListener('click',toggleSelection);
-}
-
-document.addEventListener('DOMContentLoaded', setupButtonToggle);
-document.addEventListener('DOMContentLoaded', displayController);
-
-// Select Relevant Variables
-let gameFields = document.querySelectorAll('game-board-field');
-let player = 'X';
+    displayController.updateGameBoard(); // Assuming displayController is correctly initialized before this line
+});
