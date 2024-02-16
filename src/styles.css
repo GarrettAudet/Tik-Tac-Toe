@@ -85,6 +85,7 @@ body {
 
 .game-board-field {
     cursor: pointer;
+    color: var(--background-color);
     border-bottom: 2px solid var(--background-color);
     border-right: 2px solid var(--background-color);
     font-size: 54px;

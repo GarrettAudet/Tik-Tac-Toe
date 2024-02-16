@@ -6,15 +6,17 @@ const Player = (sign) => {
 
 // Game board module to manage game state
 const gameBoard = (() => {
-    console.log('gameBoard is working')
     const board = new Array(9).fill('_');
     
     const getField = (num) => board[num];
     const setField = (position, player) => {
+        console.log('setField triggered')
         if (isValidMove(position)) {
+            console.log('True')
             board[position] = player;
             return true;
         }
+        console.log('False')
         return false; 
     }
 
@@ -48,9 +50,8 @@ const gameBoard = (() => {
 
 // Display Controller to manage UI updates
 const displayController = (() => {
-    console.log('displayController is working')
     const fieldElements = document.querySelectorAll(".game-board-field");
-    const gameResultElement = document.querySelector('.game-result');
+    const gameResultElement = document.querySelector('.game-status');
 
     const updateGameBoard = () => {
         fieldElements.forEach((field,index) => {
@@ -61,9 +62,7 @@ const displayController = (() => {
 
     fieldElements.forEach((field, index) => {
         field.addEventListener("click", () => {
-            if (!gameBoard.setField(index, gameController.getCurrentPlayerSign())) return;
-            updateGameBoard();
-            gameController.checkGameStatus();
+            gameController.playRound(index);
         });
     });
 
@@ -85,17 +84,21 @@ const gameController = (() => {
     const getCurrentPlayerSign = () => currentPlayer.getSign();
 
     const playRound = (index) => {
+        console.log('playRound Triggered')
         // Attempt to set the field; if successful, update the board and check game status
         if (gameBoard.setField(index, getCurrentPlayerSign())) {
+            console.log('playRound condition passed')
             moveCount++;
             displayController.updateGameBoard();
             checkGameStatus();
             // Switch the current player for the next turn
+            console.log('test')
             currentPlayer = currentPlayer === playerX ? playerO : playerX;
         }
     };
 
     const checkGameStatus = () => {
+        console.log('test')
         // Check for a win or a tie, and update the game result display accordingly
         if (gameBoard.checkWin(currentPlayer)) {
             displayController.displayResult(`Player ${getCurrentPlayerSign()} Wins!`);
@@ -112,7 +115,7 @@ const gameController = (() => {
         currentPlayer = playerX; // Reset to player X for the new game
         moveCount = 0;
         displayController.updateGameBoard();
-        displayController.displayResult(""); // Clear the result display
+        displayController.displayResult("Tic-Tak-Toe"); // Clear the result display
     };
 
     return { playRound, resetGame, getCurrentPlayerSign, checkGameStatus };
